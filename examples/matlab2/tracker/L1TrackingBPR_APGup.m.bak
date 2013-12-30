@@ -11,7 +11,7 @@ nT=paraT.nT;
 
 tCov = 7;
 s1_p = 1/50;
-s2_p = 1/(2^28);
+s2_p = 1/(2^24);
 
 %generate the initial templates for the 1st frame
 img = imread(s_frames{1});
@@ -31,7 +31,7 @@ para.Maxit = paraT.Maxit;
 
 dim_T	= size(T,1);	%number of elements in one template, sz_T(1)*sz_T(2)=12x15 = 180
 A		= [T2]; %data matrix is composed of T, positive trivial T.
-alpha = 0.5;%this parameter is used in the calculation of the likelihood of particle filter
+alpha = 50;%this parameter is used in the calculation of the likelihood of particle filter
 aff_obj = corners2affine(init_pos, sz_T); %get affine transformation parameters from the corner points in the first frame
 map_aff = aff_obj.afnv;
 aff_samples = ones(n_sample,1)*map_aff;
@@ -75,88 +75,17 @@ for t = 1:nframes
     
     %-Crop candidate targets "Y" according to the transformation samples
     [Y, Y_inrange, Y2] = crop_candidates(im2double(img), aff_samples(:,1:6), sz_T, tCov);
-    
-    rect= round(aff2image(map_aff', sz_T));
-    inp	= reshape(rect,2,4);
-
-%     topleft_r = inp(1,1);
-%     topleft_c = inp(2,1);
-%     botleft_r = inp(1,2);
-%     botleft_c = inp(2,2);
-%     topright_r = inp(1,3);
-%     topright_c = inp(2,3);
-%     botright_r = inp(1,4);
-%     botright_c = inp(2,4);
-        
-    driftX = 50;
-    driftY=50;
-    
-    centX = (inp(2,4)-inp(2,1))/2 - driftX/2+inp(2,1);
-    centY = (inp(1,4)- inp(1,1))/2 - driftY/2+inp(1,1);
-    
-    resultBin = zeros([driftX,driftY]);
-    
-    arr = [centY-driftY/2,centY+driftY+driftY/2,centY-driftY/2;centX-driftX/2,centX-driftX/2,centX+driftX+driftX/2];
-    arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-    arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
-
-    affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-    [Yorig, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [2*driftX,2*driftY], tCov);
-    
-    figure(3);
-   
-    subplot(1,2,2);
-    imshow(uint8(reshape(Yorig,[2*driftX,2*driftY])));
-        
-    for dy=1:driftX
-        for dx=1:driftY
-            
-            arr = [centY+dy,centY+dy+driftY,centY+dy;centX+dx,centX+dx,centX+dx+driftX];
-            arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-            arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
-            
-            affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-            [Ybuf, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [driftX,driftY], tCov);
-            
-            [code] = APGLASSOup(Temp'*Ybuf2,Dict,para);
-        
-            Diff_s = (Ybuf2 - [A(:,1:nT) fixT]*[code(1:nT); code(end)]).^2;%reconstruction error
-%             sum(Diff_s)
-%             rError = exp(-(alpha/10000)*(sum(Diff_s)^(1)));
-             rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
-            resultBin(dx,dy)=rError;
-            
-            
-        end        
-    end
-    
-    resultBin = (resultBin/max(max(resultBin)))*255;    
-    figure(3);
-    subplot(1,2,1);
-    imshow(uint8(resultBin));
-%     subplot(1,2,2);
-%     imshow(uint8(Yorig));
-%     
-    
-            
-    
     if(sum(Y_inrange==0) == n_sample)
         sprintf('Target is out of the frame!\n');
     end
     
-%     [Y,Y_crop_mean,Y_crop_std] = whitening(Y);	 % zero-mean-unit-variance
-%     [Y, Y_crop_norm] = normalizeTemplates(Y); %norm one
+    [Y,Y_crop_mean,Y_crop_std] = whitening(Y);	 % zero-mean-unit-variance
+    [Y, Y_crop_norm] = normalizeTemplates(Y); %norm one
     
     %-L1-LS for each candidate target
     eta_max	= -inf;
     q   = zeros(n_sample,1); % minimal error bound initialization
    
-    figure(2);
-    merged = mMergeIm(Y,sz_T);
-    imshow(uint8(merged));
-    
     % first stage L2-norm bounding    
     for j = 1:n_sample
         if Y_inrange(j)==0 || sum(abs(Y2(:,j)))==0
@@ -165,7 +94,7 @@ for t = 1:nframes
         
         % L2 norm bounding
         q(j) = norm(Y2(:,j)-Temp1*Y2(:,j));
-        q(j) = exp(-alpha*q(j));
+        q(j) = exp(-alpha*q(j)^(s1_p));
     end
     %  sort samples according to descend order of q
     [q,indq] = sort(q,'descend');    
@@ -180,7 +109,6 @@ for t = 1:nframes
         
         D_s = (Y2(:,indq(n)) - [A(:,1:nT) fixT]*[c(1:nT); c(end)]).^2;%reconstruction error
         p(indq(n)) = exp(-alpha*(sum(D_s)^(s2_p))); % probability w.r.t samples
-%         p(indq(n)) = -sum(D_s);
         tau = tau + p(indq(n))/(2*n_sample-1);%update the threshold
         
         if(sum(c(1:nT))<0) %remove the inverse intensity patterns
@@ -194,11 +122,7 @@ for t = 1:nframes
         n = n+1;
     end
     
-    count(t) = n;           
-    
-%     p = p - min(p);
-%     [maxV, id_max] = max(p);
-%     [c_max] = APGLASSOup(Temp'*Y2(:,indq(id_max)),Dict,para);
+    count(t) = n;    
     
     % resample according to probability
     map_aff = aff_samples(id_max,1:6); %target transformation parameters with the maximum probability
@@ -285,7 +209,7 @@ for t = 1:nframes
         
 %%         draw tracking results
         img_color	= double(img_color);
-%         img_color	= showTemplates(img_color, T, T_mean, norms, sz_T, nT);
+        img_color	= showTemplates(img_color, T, T_mean, norms, sz_T, nT);
 
 		figure(1);
 
@@ -294,15 +218,15 @@ for t = 1:nframes
         color = [1 0 0];
         drawAffine(map_aff, sz_T, color, 2);
         drawnow;
-		
-% 		figure(2);
-%         subplot(1,2,1);
-%         imagesc( reshape(fixT,21,10));
-%         colormap(hsv)
+	
+		figure(2);
+        subplot(1,2,1);
+        imagesc( reshape(fixT,21,10));
+        colormap(hsv)
         
-%         subplot(1,2,2);
-%         imagesc( reshape(Y2(:,id_max),21,10));
-%         colormap(hsv)
+        subplot(1,2,2);
+        imagesc( reshape(Y2(:,id_max),21,10));
+        colormap(hsv)
         
         if ~exist(s_debug_path,'dir')
             fprintf('Path %s not exist!\n', s_debug_path);

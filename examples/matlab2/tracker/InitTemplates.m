@@ -1,4 +1,4 @@
-function [T,T_norm,T_mean,T_std] = InitTemplates(tsize, numT, img, cpt)
+function [T,T_norm,T_mean,T_std, T2] = InitTemplates(tsize, numT, img, cpt, tCov)
 % generate templates from single image
 %   (r1,c1) ***** (r3,c3)            (1,1) ***** (1,cols)
 %     *             *                  *           *
@@ -25,9 +25,11 @@ end
 
 %% Initializating templates and image
 T	= zeros(prod(tsize),10);
+% T2 = zeros(tCov*tCov*2+tCov,10);
+T2 = zeros(tCov*tCov*2,10);
 
 %% cropping and normalizing templates
 for n=1:numT
-    [T(:,n),T_norm(n),T_mean(n),T_std(n)] = ...
+    [T(:,n),T_norm(n),T_mean(n),T_std(n), T2(:,n)] = ...
 		corner2image(img, p{n}, tsize);   
 end

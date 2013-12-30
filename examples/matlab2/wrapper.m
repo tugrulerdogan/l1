@@ -49,22 +49,15 @@ H = region(4);
 
 
 % parameters setting for tracking
-% para.lambda = [0.2,0.001,10]; % lambda 1, lambda 2 for a_T and a_I respectively, lambda 3 for the L2 norm parameter
-% % set para.lambda = [a,a,0]; then this the old model
-% para.angle_threshold = 40;
-% para.Lip	= 8;
-% para.Maxit	= 5;
-% para.nT		= 10;%number of templates for the sparse representation
-% para.rel_std_afnv = [0.01,0.0000,0.0000,0.01,1,1];%diviation of the sampling of particle filter
 para.lambda = [0.2,0.001,10]; % lambda 1, lambda 2 for a_T and a_I respectively, lambda 3 for the L2 norm parameter
 % set para.lambda = [a,a,0]; then this the old model
 para.angle_threshold = 40;
 para.Lip	= 8;
 para.Maxit	= 5;
 para.nT		= 10;%number of templates for the sparse representation
-para.rel_std_afnv = [0.03,0.0005,0.0005,0.03,1,1];%diviation of the sampling of particle filter
+para.rel_std_afnv = [0.01,0.0000,0.0000,0.01,5,5];%diviation of the sampling of particle filter
 para.n_sample	= 100;		%number of particles
-sz_T =[12,15];
+sz_T =[120,150];
 % init_pos= [55,140,53;
 %                    65,64,170];
 init_pos = [y,y+H,y;x,x,x+W];
@@ -136,7 +129,7 @@ end
 
 % results=[1,2,3,4]
 
-% save('d:\l1.mat', 'results');
+save('d:\l1.mat', 'results');
 csvwrite(output_file, results);
 % vot_deinitialize(results);
 
