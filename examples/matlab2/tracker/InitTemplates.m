@@ -26,7 +26,7 @@ end
 %% Initializating templates and image
 T	= zeros(prod(tsize),10);
 % T2 = zeros(tCov*tCov*2+tCov,10);
-T2 = zeros(tCov*tCov*2,10);
+T2 = zeros(tCov*tCov,10);
 
 %% cropping and normalizing templates
 for n=1:numT

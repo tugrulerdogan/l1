@@ -6,7 +6,7 @@ c = prod(template_size);
 gly_inrange = zeros(nsamples,1);
 gly_crop = zeros(c,nsamples);
 % gly_cov = zeros(tCov*tCov*2+tCov,nsamples);
-gly_cov = zeros(tCov*tCov*2,nsamples);
+gly_cov = zeros(tCov*tCov,nsamples);
 
 for n = 1:nsamples
     curr_afnv = curr_samples(n, :);    
