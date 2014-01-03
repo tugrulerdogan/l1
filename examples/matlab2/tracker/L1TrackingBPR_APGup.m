@@ -79,66 +79,118 @@ for t = 1:nframes
     rect= round(aff2image(map_aff', sz_T));
     inp	= reshape(rect,2,4);
 
-%     topleft_r = inp(1,1);
-%     topleft_c = inp(2,1);
-%     botleft_r = inp(1,2);
-%     botleft_c = inp(2,2);
-%     topright_r = inp(1,3);
-%     topright_c = inp(2,3);
-%     botright_r = inp(1,4);
-%     botright_c = inp(2,4);
-        
-    driftX = 50;
-    driftY=50;
-    
-    centX = (inp(2,4)-inp(2,1))/2 - driftX/2+inp(2,1);
-    centY = (inp(1,4)- inp(1,1))/2 - driftY/2+inp(1,1);
-    
-    resultBin = zeros([driftX,driftY]);
-    
-    arr = [centY-driftY/2,centY+driftY+driftY/2,centY-driftY/2;centX-driftX/2,centX-driftX/2,centX+driftX+driftX/2];
-    arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-    arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
+% %     topleft_r = inp(1,1);
+% %     topleft_c = inp(2,1);
+% %     botleft_r = inp(1,2);
+% %     botleft_c = inp(2,2);
+% %     topright_r = inp(1,3);
+% %     topright_c = inp(2,3);
+% %     botright_r = inp(1,4);
+% %     botright_c = inp(2,4);
+%         
+%     driftX = 50;
+%     driftY=50;
+%     
+%     centX = (inp(2,4)-inp(2,1))/2 - driftX/2+inp(2,1);
+%     centY = (inp(1,4)- inp(1,1))/2 - driftY/2+inp(1,1);
+%     
+%     resultBin = zeros([driftX,driftY]);
+%     
+%     arr = [centY-driftY/2,centY+driftY+driftY/2,centY-driftY/2;centX-driftX/2,centX-driftX/2,centX+driftX+driftX/2];
+%     arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
+%     arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
+% 
+%     affEq = corners2affine(arr, [driftX,driftY]);
+% %             affEq
+%     [Yorig, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [2*driftX,2*driftY], tCov);
+%     
+%     figure(3);
+%    
+%     subplot(1,2,2);
+%     imshow(uint8(reshape(Yorig,[2*driftX,2*driftY])));
+%         
+%     for dy=1:driftX
+%         for dx=1:driftY
+%             
+%             arr = [centY+dy,centY+dy+driftY,centY+dy;centX+dx,centX+dx,centX+dx+driftX];
+%             arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
+%             arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
+%             
+%             affEq = corners2affine(arr, [driftX,driftY]);
+% %             affEq
+%             [Ybuf, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [driftX,driftY], tCov);
+%             
+%             [code] = APGLASSOup(Temp'*Ybuf2,Dict,para);
+%         
+%             Diff_s = (Ybuf2 - [A(:,1:nT) fixT]*[code(1:nT); code(end)]).^2;%reconstruction error
+% %             sum(Diff_s)
+% %             rError = exp(-(alpha/10000)*(sum(Diff_s)^(1)));
+%              rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
+%             resultBin(dx,dy)=rError;
+%             
+%             
+%         end        
+%     end
+%     
+%     resultBin = (resultBin/max(max(resultBin)))*255;    
+%     figure(3);
+%     subplot(1,2,1);
+%     imshow(uint8(resultBin));
+% %     subplot(1,2,2);
+% %     imshow(uint8(Yorig));
+% %     
 
-    affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-    [Yorig, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [2*driftX,2*driftY], tCov);
-    
-    figure(3);
-   
-    subplot(1,2,2);
-    imshow(uint8(reshape(Yorig,[2*driftX,2*driftY])));
+fnum =0;
+
+ while 1 == 1
+     
+            figure(fnum*2+1)
+         imshow(img_color);
+         
+         hold on
+         
         
-    for dy=1:driftX
-        for dx=1:driftY
-            
-            arr = [centY+dy,centY+dy+driftY,centY+dy;centX+dx,centX+dx,centX+dx+driftX];
-            arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-            arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
-            
-            affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-            [Ybuf, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [driftX,driftY], tCov);
+         
+         [x,y] = ginput(4)
+        plot(x,y)
+        color = [0 1 0];
+        for ln =0:3
+%             ln
+%             pl = line([x(mod(ln,4)+1), x(mod(ln+1,4)+1)], [y(mod(ln,4)+1), y(mod(ln+1,4)+1)]);
+%             set(pl, 'Color', color); set(pl, 'LineWidth', 1); set(pl, 'LineStyle', '-');
+            figure(fnum*2+1)
+            plot([x(mod(ln,4)+1), x(mod(ln+1,4)+1)], [y(mod(ln,4)+1), y(mod(ln+1,4)+1)],'Color','r','LineWidth',2)
+
+        end
+        
+        arr = [y(1),y(3),y(1);x(1),x(1),x(3)];
+         affEq = corners2affine(arr, [x(3)-x(1),y(3)-y(1)]);
+% %             affEq
+            [Ybuf, Y_inrangebuf, Ybuf2, covvr] = crop_candidates(im2double(img), affEq.afnv, [x(3)-x(1),y(3)-y(1)], tCov);
+      
+            figure(fnum*2+2)
+            subplot(1,2,1);
+        imagesc( covvr);
+        colormap(hsv)
+        
+        subplot(1,2,2);
+        imagesc( reshape(Ybuf2,7,14));
+        colormap(hsv)
             
             [code] = APGLASSOup(Temp'*Ybuf2,Dict,para);
         
             Diff_s = (Ybuf2 - [A(:,1:nT) fixT]*[code(1:nT); code(end)]).^2;%reconstruction error
 %             sum(Diff_s)
 %             rError = exp(-(alpha/10000)*(sum(Diff_s)^(1)));
-             rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
-            resultBin(dx,dy)=rError;
-            
-            
-        end        
-    end
-    
-    resultBin = (resultBin/max(max(resultBin)))*255;    
-    figure(3);
-    subplot(1,2,1);
-    imshow(uint8(resultBin));
-%     subplot(1,2,2);
-%     imshow(uint8(Yorig));
-%     
+
+%                'Error  = '
+              rError = exp(-alpha*(sum(Diff_s)))
+              
+               '\n\n\n'
+%              rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
+        
+        fnum = mod(fnum+1,2);
+ end
     
             
     

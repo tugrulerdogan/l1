@@ -1,4 +1,4 @@
-function [gly_crop, gly_inrange, gly_cov] = crop_candidates(img_frame, curr_samples, template_size, tCov)
+function [gly_crop, gly_inrange, gly_cov, C] = crop_candidates(img_frame, curr_samples, template_size, tCov)
 %create gly_crop, gly_inrange
 
 nsamples = size(curr_samples,1);
@@ -17,5 +17,5 @@ for n = 1:nsamples
     [C, M] = calculateCovarianceFromImage(img_cut_cov);
     gly_cov(:,n) = CholeskyDec(C,M);
     
-    gly_crop(:,n) = reshape(img_cut, c , 1);
+    gly_crop(:,n) = img_cut(:);%reshape(img_cut, c , 1);
 end
