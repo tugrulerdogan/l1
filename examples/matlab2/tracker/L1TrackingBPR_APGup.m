@@ -79,66 +79,66 @@ for t = 1:nframes
     rect= round(aff2image(map_aff', sz_T));
     inp	= reshape(rect,2,4);
 
-%     topleft_r = inp(1,1);
-%     topleft_c = inp(2,1);
-%     botleft_r = inp(1,2);
-%     botleft_c = inp(2,2);
-%     topright_r = inp(1,3);
-%     topright_c = inp(2,3);
-%     botright_r = inp(1,4);
-%     botright_c = inp(2,4);
-        
-    driftX = 50;
-    driftY=50;
-    
-    centX = (inp(2,4)-inp(2,1))/2 - driftX/2+inp(2,1);
-    centY = (inp(1,4)- inp(1,1))/2 - driftY/2+inp(1,1);
-    
-    resultBin = zeros([driftX,driftY]);
-    
-    arr = [centY-driftY/2,centY+driftY+driftY/2,centY-driftY/2;centX-driftX/2,centX-driftX/2,centX+driftX+driftX/2];
-    arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-    arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
-
-    affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-    [Yorig, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [2*driftX,2*driftY], tCov);
-    
-    figure(3);
-   
-    subplot(1,2,2);
-    imshow(uint8(reshape(Yorig,[2*driftX,2*driftY])));
-        
-    for dy=1:driftX
-        for dx=1:driftY
-            
-            arr = [centY+dy,centY+dy+driftY,centY+dy;centX+dx,centX+dx,centX+dx+driftX];
-            arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
-            arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
-            
-            affEq = corners2affine(arr, [driftX,driftY]);
-%             affEq
-            [Ybuf, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [driftX,driftY], tCov);
-            
-            [code] = APGLASSOup(Temp'*Ybuf2,Dict,para);
-        
-            Diff_s = (Ybuf2 - [A(:,1:nT) fixT]*[code(1:nT); code(end)]).^2;%reconstruction error
-%             sum(Diff_s)
-%             rError = exp(-(alpha/10000)*(sum(Diff_s)^(1)));
-             rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
-            resultBin(dx,dy)=rError;
-            
-            
-        end        
-    end
-    
-    resultBin = (resultBin/max(max(resultBin)))*255;    
-    figure(3);
-    subplot(1,2,1);
-    imshow(uint8(resultBin));
-%     subplot(1,2,2);
-%     imshow(uint8(Yorig));
+% %     topleft_r = inp(1,1);
+% %     topleft_c = inp(2,1);
+% %     botleft_r = inp(1,2);
+% %     botleft_c = inp(2,2);
+% %     topright_r = inp(1,3);
+% %     topright_c = inp(2,3);
+% %     botright_r = inp(1,4);
+% %     botright_c = inp(2,4);
+%         
+%     driftX = 50;
+%     driftY=50;
 %     
+%     centX = (inp(2,4)-inp(2,1))/2 - driftX/2+inp(2,1);
+%     centY = (inp(1,4)- inp(1,1))/2 - driftY/2+inp(1,1);
+%     
+%     resultBin = zeros([driftX,driftY]);
+%     
+%     arr = [centY-driftY/2,centY+driftY+driftY/2,centY-driftY/2;centX-driftX/2,centX-driftX/2,centX+driftX+driftX/2];
+%     arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
+%     arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
+% 
+%     affEq = corners2affine(arr, [driftX,driftY]);
+% %             affEq
+%     [Yorig, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [2*driftX,2*driftY], tCov);
+%     
+%     figure(3);
+%    
+%     subplot(1,2,2);
+%     imshow(uint8(reshape(Yorig,[2*driftX,2*driftY])));
+%         
+%     for dy=1:driftX
+%         for dx=1:driftY
+%             
+%             arr = [centY+dy,centY+dy+driftY,centY+dy;centX+dx,centX+dx,centX+dx+driftX];
+%             arr(1,find(arr(1,:)>size(img,1)))=size(img,1);
+%             arr(2,find(arr(2,:)>size(img,2)))=size(img,2);
+%             
+%             affEq = corners2affine(arr, [driftX,driftY]);
+% %             affEq
+%             [Ybuf, Y_inrangebuf, Ybuf2] = crop_candidates(im2double(img), affEq.afnv, [driftX,driftY], tCov);
+%             
+%             [code] = APGLASSOup(Temp'*Ybuf2,Dict,para);
+%         
+%             Diff_s = (Ybuf2 - [A(:,1:nT) fixT]*[code(1:nT); code(end)]).^2;%reconstruction error
+% %             sum(Diff_s)
+% %             rError = exp(-(alpha/10000)*(sum(Diff_s)^(1)));
+%              rError = exp(((-(alpha)*(sum(Diff_s)))/(10^36))^3);
+%             resultBin(dx,dy)=rError;
+%             
+%             
+%         end        
+%     end
+%     
+%     resultBin = (resultBin/max(max(resultBin)))*255;    
+%     figure(3);
+%     subplot(1,2,1);
+%     imshow(uint8(resultBin));
+% %     subplot(1,2,2);
+% %     imshow(uint8(Yorig));
+% %     
     
             
     
@@ -199,13 +199,16 @@ for t = 1:nframes
 %     p = p - min(p);
 %     [maxV, id_max] = max(p);
 %     [c_max] = APGLASSOup(Temp'*Y2(:,indq(id_max)),Dict,para);
+
+    mstate = Y2*p;
+%     mstate = sum(mstate);
     
     % resample according to probability
     map_aff = aff_samples(id_max,1:6); %target transformation parameters with the maximum probability
     a_max	= c_max(1:nT);
     [aff_samples, ~] = resample(aff_samples,p,map_aff); %resample the samples wrt. the probability
     [~, indA] = max(a_max);
-    min_angle = images_angle(Y2(:,id_max),A(:,indA));
+    min_angle = images_angle(mstate,A(:,indA));
     ratio(t) = norm(c_max(nT:end-1));
     Coeff (:,t) = c_max;    
     

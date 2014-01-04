@@ -22,8 +22,10 @@ function [ C1 M ] = calculateCovarianceFromImage( g )
     F(:,3) = abs(Iy(:));
     F(:,4) = abs(Ixx(:));
     F(:,5) = abs(Iyy(:));
-    F(:,6) = s2(:);
-    F(:,7) = s1(:);
+    normIgrad=sqrt(Ix.*Ix+Iy.*Iy);
+    F(:,6) = normIgrad(:);%s2(:);
+    orIgrad=atan2(Iy,Ix);
+    F(:,7) = orIgrad(:);%s1(:);
 
     C1 = cov(F);
     M = mean(C1);
